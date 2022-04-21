@@ -16,13 +16,13 @@ import { useEffect, useState } from 'react';
 
 function App() {
 
-  const [selectedExtension, setSelectedExtesion] = useState([]);
+  const [selectedExtension, setSelectedExtension] = useState([]);
   const [accountsConnected, setAccountsConnected] = useState([]);
 
   const injectedExtensions = async () => {
     // await web3InWindow()
     let selectedExtension = await web3Enable('my cool dapp', 'talisman')
-    setSelectedExtesion(selectedExtension)
+    setSelectedExtension(selectedExtension)
 
     let accounts = []
     selectedExtension ? accounts = await web3Accounts() : console.log("No Accounts Found")
