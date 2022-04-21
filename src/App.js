@@ -8,41 +8,56 @@ import {
   web3FromSource,
   isWeb3Injected,
   web3EnablePromise,
+  web3Enable,
   web3AccountsSubscribe
 } from './talisman-connect/bundle.ts';
 
-import {  web3Enable as taliweb }  from './talisman-connect/bundle.ts';
-
-
-import {
-  web3Enable
-} from '@polkadot/extension-dapp'
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
 
+  const [selectedExtension, setSelectedExtesion] = useState([]);
+  const [accountsConnected, setAccountsConnected] = useState([]);
+
   const injectedExtensions = async () => {
-    await web3InWindow()
-    await taliweb('my cool dapp', 'talisman')
-    await web3Enable("cool daap")
+    // await web3InWindow()
+    let selectedExtension = await web3Enable('my cool dapp', 'talisman')
+    setSelectedExtesion(selectedExtension)
+
+    let accounts = []
+    selectedExtension ? accounts = await web3Accounts() : console.log("No Accounts Found")
+    setAccountsConnected(accounts)
+    
+    console.log(accounts)
   }
   // const selectedExtension = async () => 
 
   useEffect(() => {
-    injectedExtensions();
+    // injectedExtensions();
     // selectedExtension();
   })
-
-
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          The Big Wonderful Testing Thingy <span className="Version-Number">1.0.0</span>
-        </p>
+        <h2>
+          The <b>Big</b> Wonderful Testing Thingy <span className="Version-Number">1.1.0</span>
+        </h2>
+        { selectedExtension.length > 0 ? (
+          <>
+            <h4>Selected Extension {selectedExtension[0].name}</h4>
+            {accountsConnected.map(account => 
+                <p>{account.meta.name} : {account.address}</p>
+            )}
+          </>
+        ):(
+          <a href="#" onClick={() => injectedExtensions()}>
+            <div className='btn'>
+            Click me to connect your wallet lol
+            </div>
+          </a>
+        )}
       </header>
     </div>
   );
