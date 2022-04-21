@@ -1,60 +1,54 @@
 import logo from './logo.gif';
 import './App.css';
-
-import {
-  web3InWindow,
-  web3Accounts,
-  web3FromAddress,
-  web3FromSource,
-  isWeb3Injected,
-  web3EnablePromise,
-  web3Enable,
-  web3AccountsSubscribe
-} from './talisman-connect/bundle.ts';
-
 import { useEffect, useState } from 'react';
 
+// import {
+//   web3Accounts,
+//   web3Enable,
+// } from './talisman-connect/bundle.ts';
+
+import {
+  web3Enable, 
+  web3Accounts
+} from '@polkadot/extension-dapp';
+
 function App() {
-
-  const [selectedExtension, setSelectedExtension] = useState([]);
+  const [activeExtension, setActiveExtension] = useState([]);
   const [accountsConnected, setAccountsConnected] = useState([]);
+  
+  // const injectedExtensions = window?.injectedWeb3
 
-  const injectedExtensions = async () => {
-    // await web3InWindow()
-    let selectedExtension = await web3Enable('my cool dapp', 'talisman')
-    setSelectedExtension(selectedExtension)
+  const connectExtension = async () => {
+    
+    let activeExtension = await web3Enable('my cool dapp')
+
+    setActiveExtension(activeExtension)
 
     let accounts = []
-    selectedExtension ? accounts = await web3Accounts() : console.log("No Accounts Found")
+    activeExtension ? accounts = await web3Accounts() : console.log("No Accounts Found")
     setAccountsConnected(accounts)
     
     console.log(accounts)
   }
-  // const selectedExtension = async () => 
-
-  useEffect(() => {
-    // injectedExtensions();
-    // selectedExtension();
-  })
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <h2>
-          The <b>Big</b> Wonderful Testing Thingy <span className="Version-Number">1.1.0</span>
+          AmsterDOT Integration Sandpit
         </h2>
-        { selectedExtension.length > 0 ? (
+        { activeExtension.length > 0 ? (
           <>
-            <h4>Selected Extension {selectedExtension[0].name}</h4>
+            <h4>Selected Extension: {activeExtension[0].name}</h4>
             {accountsConnected.map(account => 
                 <p>{account.meta.name} : {account.address}</p>
             )}
           </>
         ):(
-          <a href="#" onClick={() => injectedExtensions()}>
+          <a href="#" onClick={() => connectExtension()}>
             <div className='btn'>
-            Click me to connect your wallet lol
+            Connect your wallet
             </div>
           </a>
         )}
