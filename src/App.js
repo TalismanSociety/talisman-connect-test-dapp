@@ -14,9 +14,11 @@ function App() {
   const [activeExtension, setActiveExtension] = useState([]);
   const [accountConnected, setAccountConnected] = useState([]);
   
+
+  // connect Polkadot-sdk extensions
   const connectExtension = async () => {
     
-    let activeExtension = await web3Enable('my test dapp')
+    let activeExtension = await web3Enable('encode hackathon dapp')
 
     setActiveExtension(activeExtension)
 
@@ -28,23 +30,28 @@ function App() {
   // burn 1337 WND from first connected account  
   const initTransaction = async () => {
 
+    // init API
     const wsProvider = new WsProvider('wss://westend-rpc.polkadot.io');
     // const wsProvider = new WsProvider('wss://127.0.0.1:9944'); // for a local node
     const api = await ApiPromise.create({ provider: wsProvider });
+
+
+    // grab injected object
     const injector = await web3FromAddress(accountConnected[0].address);
   
     // send to zero address
     const tx = api.tx.balances.transferKeepAlive('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM', 1337)
 
+    // propogate tx
     tx.signAndSend(accountConnected[0].address, { signer: injector.signer }, ({ status }) => {
       if (status.isInBlock) {
           console.log(`Completed at block hash #${status.asInBlock.toString()}`);
       } else {
           console.log(`Current status: ${status.type}`);
       }
-  }).catch((error) => {
-      console.log(':( transaction failed', error);
-  });  
+    }).catch((error) => {
+        console.log(':( transaction failed', error);
+    });  
 }
   
 
@@ -67,7 +74,7 @@ function App() {
             <div>
               <a href="#init" onClick={() => initTransaction()}>
                 <div className='btn'>
-                  Burn Westies
+                  Burn 1337 Westies
                 </div>
               </a>
               <br/>
