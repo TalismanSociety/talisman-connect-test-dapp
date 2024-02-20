@@ -1,58 +1,90 @@
 import logo from './logo.gif';
 import './App.css';
-import { useEffect, useState } from 'react';
-
-// import {
-//   web3Accounts,
-//   web3Enable,
-// } from './talisman-connect/bundle.ts';
+import { useState } from 'react';
 
 import {
   web3Enable, 
-  web3Accounts
+  web3Accounts,
+  web3FromAddress
 } from '@polkadot/extension-dapp';
+
+import { ApiPromise, WsProvider } from '@polkadot/api'
 
 function App() {
   const [activeExtension, setActiveExtension] = useState([]);
-  const [accountsConnected, setAccountsConnected] = useState([]);
+  const [accountConnected, setAccountConnected] = useState([]);
   
-  // const injectedExtensions = window?.injectedWeb3
-
   const connectExtension = async () => {
     
-    let activeExtension = await web3Enable('my cool dapp')
+    let activeExtension = await web3Enable('my test dapp')
 
     setActiveExtension(activeExtension)
 
     let accounts = []
     activeExtension ? accounts = await web3Accounts() : console.log("No Accounts Found")
-    setAccountsConnected(accounts)
-    
-    console.log(accounts)
+    setAccountConnected(accounts)
   }
+
+  // burn 1337 WND from first connected account  
+  const initTransaction = async () => {
+
+    const wsProvider = new WsProvider('wss://westend-rpc.polkadot.io');
+    // const wsProvider = new WsProvider('wss://127.0.0.1:9944'); // for a local node
+    const api = await ApiPromise.create({ provider: wsProvider });
+    const injector = await web3FromAddress(accountConnected[0].address);
+  
+    // send to zero address
+    const tx = api.tx.balances.transferKeepAlive('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM', 1337)
+
+    tx.signAndSend(accountConnected[0].address, { signer: injector.signer }, ({ status }) => {
+      if (status.isInBlock) {
+          console.log(`Completed at block hash #${status.asInBlock.toString()}`);
+      } else {
+          console.log(`Current status: ${status.type}`);
+      }
+  }).catch((error) => {
+      console.log(':( transaction failed', error);
+  });  
+}
+  
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <h2>
-          AmsterDOT Integration Sandpit
+          Encode Hackathon Workshop
         </h2>
+      </header>
+      <div className="App-body">
         { activeExtension.length > 0 ? (
           <>
             <h4>Selected Extension: {activeExtension[0].name}</h4>
-            {accountsConnected.map(account => 
+            Account:
+            {accountConnected.map(account => 
                 <p>{account.meta.name} : {account.address}</p>
             )}
+            <div>
+              <a href="#init" onClick={() => initTransaction()}>
+                <div className='btn'>
+                  Burn Westies
+                </div>
+              </a>
+              <br/>
+            </div>
           </>
         ):(
-          <a href="#" onClick={() => connectExtension()}>
-            <div className='btn'>
-            Connect your wallet
-            </div>
-          </a>
+          <div>
+            <a href="#connect" onClick={() => connectExtension()}>
+              <div className='btn'>
+              Connect Wallet
+              </div>
+            </a>
+            <br/>
+          </div>
         )}
-      </header>
+      </div>
+
     </div>
   );
 }
